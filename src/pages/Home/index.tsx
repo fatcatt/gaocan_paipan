@@ -103,7 +103,6 @@ export default function HomeScreen({navigation}) {
             let d = l[i];
             ftres.push(d.toFullString());
         }
-        console.log(ftres);
         setFtRes(ftres);
     };
 
@@ -134,7 +133,8 @@ export default function HomeScreen({navigation}) {
         dispatch({type: 'UPDATE_DATE', payload: moment(date ? date : currentDate).format('YYYY-MM-DD')});
         setDateSelectVis(false);
     };
-    const handleComfirmTime = time => {
+    const handleComfirmTime = (time?) => {
+        console.log(moment(currentTime).format('HH:mm'));
         dispatch({type: 'UPDATE_TIME', payload: time ? time : moment(currentTime).format('HH:mm')});
         setTimeSelectVis(false);
     };
@@ -162,6 +162,7 @@ export default function HomeScreen({navigation}) {
         setCurrentDate(DATETIMETEM.time);
         handleComfirmDate(DATETIMETEM.date);
         handleComfirmTime(DATETIMETEM.time);
+        setFantuiModalVis(false);
     };
 
     function extractDateAndTime(inputString) {
@@ -286,29 +287,24 @@ export default function HomeScreen({navigation}) {
             jieqi = '出生于' + d.getCurrentJieQi()._p.name + '0天';
         } else {
             let prev = d.getPrevJieQi(false);
-            console.log(prev.getSolar().toYmdHms());
             let diff = moment(solarDate + ' ' + inputFrom.inputTime).diff(moment(prev.getSolar().toYmdHms()), 'days');
             jieqi = '出生于' + prev.getName() + '后' + diff + '天';
         }
         // ---------------------我是分割-----------------------
         // form表单中的date有时是阴历，有时是阳历；这里使用排盘专用的阳历
         const [Cml_y, Cml_m, Cml_d] = solarDate.split(/[-\s:]/);
-        // console.log(inputFrom.inputTime);
         const [Cml_h, Cml_i, Cml_s = '00'] = inputFrom.inputTime.split(/[-\s:]/);
-        // console.log(Cml_h, Cml_i);
         const Cml_his = Cml_h + ':' + Cml_i + ':' + Cml_s;
         var ob = new Object();
         var t = timeStr2hour(Cml_his);
         var jd = JD.JD(year2Ayear(Cml_y), Cml_m - 0, Cml_d - 0 + t / 24);
         obb.mingLiBaZi(jd + curTZ / 24 - J2000, Cp11_J / radd, ob); //八字计算
         // getLunar(Cml_y, Cml_m);
-        // console.log(ob);
         setBazi(ob);
         const res = '<font color=red>  <b>[日标]：</b></font>' + '公历 ' + Cml_y + '-' + Cml_m + '-' + Cml_d + ' 儒略日数 ' + int2(jd + 0.5) + ' 距2000年首' + int2(jd + 0.5 - J2000) + '日<br>' + '<font color=red  ><b>[八字]：</b></font>' + ob.bz_jn + '年 ' + ob.bz_jy + '月 ' + ob.bz_jr + '日 ' + ob.bz_js + '时 真太阳 <font color=red>' + ob.bz_zty + '</font><br>' + '<font color=green><b>[纪时]：</b></font><i>' + ob.bz_JS + '</i><br>' + '<font color=green><b>[时标]：</b></font><i>' + '23　 01　 03　 05　 07　 09　 11　 13　 15　 17　 19　 21　 23';
         setMl_result(res);
         // const dayun = getDaYun(gender, ob.bz_jy, ob.bz_jr);
         // getNianLi(Cml_y);
-        console.log('+++++++++++++++++');
         const shensha = getShenSha(ob, gender);
         navigation.navigate('八字盘', {navigationParams: {ob, dayun, res: {solarDate: solarDate + '  ' + Cml_his, lunarDate: lunarDate + '  ' + Cml_his, jieqi, canggan, shishen, nayin, gender, taiyuan, minggong, shengong, shensha}}});
     }
@@ -317,8 +313,6 @@ export default function HomeScreen({navigation}) {
     function getNianLi(y) {
         let res1 = nianLiHTML(y, '');
         let res2 = nianLi2HTML(y);
-        // console.log(res1);
-        // console.log(res2);
     }
 
     // 此刻
@@ -413,7 +407,7 @@ export default function HomeScreen({navigation}) {
             <Modal isVisible={timeSelectVis} style={styles.modal} onBackdropPress={() => setTimeSelectVis(false)}>
                 <View style={styles.modalBox}>
                     <DateTimePicker value={currentTime} onChange={onTimeChange} display="spinner" mode="time" />
-                    <Button title="确定" onPress={handleComfirmTime} />
+                    <Button title="确定" onPress={() => handleComfirmTime()} />
                 </View>
             </Modal>
             <Modal isVisible={fantuiModalVis} style={styles.modal} onBackdropPress={() => setFantuiModalVis(false)}>
@@ -439,7 +433,6 @@ export default function HomeScreen({navigation}) {
                                     defaultButtonText={ftBaziInfo.nianGan}
                                     onSelect={(selectedItem, index) => {
                                         setFtBaziInfo({type: 'UPDATE_NIANGAN', payload: selectedItem});
-                                        console.log(selectedItem, index);
                                     }}
                                 />
                             </View>
@@ -449,9 +442,7 @@ export default function HomeScreen({navigation}) {
                                     buttonStyle={{width: 60, height: 60, borderRadius: 30}}
                                     defaultButtonText={ftBaziInfo.nianZhi}
                                     onSelect={(selectedItem, index) => {
-                                        console.log(ftBaziInfo.nianGan);
                                         setFtBaziInfo({type: 'UPDATE_NIANZHI', payload: selectedItem});
-                                        console.log(selectedItem, index);
                                     }}
                                 />
                             </View>
@@ -467,7 +458,6 @@ export default function HomeScreen({navigation}) {
                                     defaultButtonText={ftBaziInfo.yueGan}
                                     onSelect={(selectedItem, index) => {
                                         setFtBaziInfo({type: 'UPDATE_YUEGAN', payload: selectedItem});
-                                        console.log(selectedItem, index);
                                     }}
                                 />
                             </View>
@@ -477,9 +467,7 @@ export default function HomeScreen({navigation}) {
                                     buttonStyle={{width: 60, height: 60, borderRadius: 30}}
                                     defaultButtonText={ftBaziInfo.yueZhi}
                                     onSelect={(selectedItem, index) => {
-                                        console.log(ftBaziInfo.yueGan);
                                         setFtBaziInfo({type: 'UPDATE_YUEZHI', payload: selectedItem});
-                                        console.log(selectedItem, index);
                                     }}
                                 />
                             </View>
@@ -495,7 +483,6 @@ export default function HomeScreen({navigation}) {
                                     defaultButtonText={ftBaziInfo.riGan}
                                     onSelect={(selectedItem, index) => {
                                         setFtBaziInfo({type: 'UPDATE_RIGAN', payload: selectedItem});
-                                        console.log(selectedItem, index);
                                     }}
                                 />
                             </View>
@@ -505,9 +492,7 @@ export default function HomeScreen({navigation}) {
                                     buttonStyle={{width: 60, height: 60, borderRadius: 30}}
                                     defaultButtonText={ftBaziInfo.riZhi}
                                     onSelect={(selectedItem, index) => {
-                                        console.log(ftBaziInfo.riGan);
                                         setFtBaziInfo({type: 'UPDATE_RIZHI', payload: selectedItem});
-                                        console.log(selectedItem, index);
                                     }}
                                 />
                             </View>
@@ -523,7 +508,6 @@ export default function HomeScreen({navigation}) {
                                     defaultButtonText={ftBaziInfo.shiGan}
                                     onSelect={(selectedItem, index) => {
                                         setFtBaziInfo({type: 'UPDATE_SHIGAN', payload: selectedItem});
-                                        console.log(selectedItem, index);
                                     }}
                                 />
                             </View>
@@ -533,9 +517,7 @@ export default function HomeScreen({navigation}) {
                                     buttonStyle={{width: 60, height: 60, borderRadius: 30}}
                                     defaultButtonText={ftBaziInfo.shiZhi}
                                     onSelect={(selectedItem, index) => {
-                                        console.log(ftBaziInfo.shiGan);
                                         setFtBaziInfo({type: 'UPDATE_SHIZHI', payload: selectedItem});
-                                        console.log(selectedItem, index);
                                     }}
                                 />
                             </View>
