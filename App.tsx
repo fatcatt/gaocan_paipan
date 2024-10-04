@@ -24,8 +24,8 @@ const Tab = createBottomTabNavigator();
 const TabNavigator = () => {
     return (
         <Tab.Navigator>
-            <Tab.Screen name="Home" component={HomeScreen} />
-            <Tab.Screen name="Settings" component={SettingsScreen} />
+            <Tab.Screen name="天机排盘宝" component={HomeScreen} options={{headerShown: false}} />
+            <Tab.Screen name="设置" component={SettingsScreen} options={{headerShown: false}} />
         </Tab.Navigator>
     );
 };
@@ -34,9 +34,9 @@ function App() {
     return (
         <View style={styles.body}>
             <NavigationContainer>
-                <Stack.Navigator>
+                <Stack.Navigator screenOptions={{headerShown: false}}>
                     <Stack.Screen name="back" component={TabNavigator} options={{headerShown: false}}></Stack.Screen>
-                    <Stack.Screen name="八字盘" component={BaziPanScreen} />
+                    <Stack.Screen name="八字盘" component={BaziPanScreen} options={{headerShown: false}} />
                 </Stack.Navigator>
             </NavigationContainer>
         </View>

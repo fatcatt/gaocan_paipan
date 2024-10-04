@@ -1,7 +1,7 @@
 import {View, Button, Text, DatePickerIOS, Platform} from 'react-native';
 const styles = {
     paipanWrapper: {
-        padding: 12,
+        padding: 14,
         // backgroundColor: '#fff7b3',
         // backgroundColor: '#FFFFC0',
         // backgroundColor: '#F2F5FE',

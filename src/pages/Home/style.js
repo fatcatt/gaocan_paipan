@@ -1,11 +1,8 @@
 import {View, Button, Text, DatePickerIOS, Platform} from 'react-native';
 const styles = {
-    dRig: {
-        borderRight: '1px solid #888888',
-        width: '35%',
-        display: 'inline-block'
+    contentWrapper: {
+        padding: 12
     },
-
     homeWrapper: {
         padding: 12
     },
@@ -50,10 +47,11 @@ const styles = {
         marginTop: 8
     },
     inputInfo: {
-        backgroundColor: '#fff',
+        backgroundColor: '#FFF',
         padding: 12,
         borderRadius: 8,
-        paddingBottom: 24
+        paddingBottom: 24,
+        paddingTop: 16
         // boxSizing: 'border-box'
     },
     button: {
@@ -61,7 +59,7 @@ const styles = {
         paddingHorizontal: 20,
         borderRadius: 5,
         alignItems: 'center',
-        backgroundColor: '#000'
+        backgroundColor: '#81b0ff'
     },
     buttonText: {
         color: '#fff', // 在 iOS 上设置文字颜色，在 Android 上设置为白色
@@ -97,11 +95,11 @@ const styles = {
     },
     activeButton: {
         width: 50,
-        backgroundColor: '#000',
+        backgroundColor: '#81b0ff',
         paddingVertical: 10,
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#000'
+        borderColor: '#81b0ff'
     },
     unActiveButton: {
         width: 50,
@@ -109,7 +107,7 @@ const styles = {
         paddingVertical: 10,
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#000'
+        borderColor: '#c0c9db'
     },
     activeGenderText: {
         color: '#fff'
@@ -150,6 +148,14 @@ const styles = {
     },
     modalnei: {
         height: ' 100%'
+    },
+    savePaipan: {
+        marginTop: 20,
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
+    saveSwitch: {
+        transform: [{scaleX: 0.8}, {scaleY: 0.8}]
     }
 };
 export default styles;

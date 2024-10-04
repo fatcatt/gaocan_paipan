@@ -1,22 +1,17 @@
-import {ScrollView, View, Text, TextInput, Button, TouchableWithoutFeedback, TouchableOpacity} from 'react-native';
-import React, {useEffect, useState, useRef, useReducer} from 'react';
+import {ScrollView, View, Text, TextInput, Button, TouchableWithoutFeedback, TouchableOpacity, Switch, SafeAreaView} from 'react-native';
+import React, {useEffect, useState, useReducer} from 'react';
 import {Lunar, nianLi2HTML, nianLiHTML, obb} from '../../utils/lunar.js';
-import {HXK, xz88, schHXK} from '../../utils/ephB.js';
 import {JD, J2000, radd, int2, rad2str2} from '../../utils/eph0.js';
 import {SZJ} from '../../utils/eph.js';
 import {SQv, JWv} from '../../utils/JW.js';
-import {addOp, year2Ayear, storageL, Ayear2year, timeStr2hour} from '../../utils/tools.js';
-import {getDaYun, getShenSha} from '../../utils/calcBazi';
+import {addOp, year2Ayear, storageL, timeStr2hour} from '../../utils/tools.js';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from 'react-native-modal';
 import styles from './style.js';
 import moment from 'moment';
-import {Gan, Zhi, YangGan, YangZhi, YinZhi} from '../../constants';
+import {Gan, YangGan, YangZhi, YinZhi} from '../../constants';
 import calendar from 'js-calendar-converter';
-const {Solar, HolidayUtil} = require('lunar-javascript');
 import {Lunar1} from '../../utils/lunar1';
-import RNPickerSelect from 'react-native-picker-select';
-import {Picker} from '@react-native-picker/picker';
 import SelectDropdown from 'react-native-select-dropdown';
 // import {Lunar1} from '../../../lll.js';
 const reducer = (inputFrom, action) => {
@@ -81,9 +76,7 @@ export default function HomeScreen({navigation}) {
     const [timeSelectVis, setTimeSelectVis] = useState(false);
     const [gender, setGender] = useState('male');
     const [dateType, setDateType] = useState('gregorian');
-    const [selectedLanguage, setSelectedLanguage] = useState('ljskd');
     // 反推相关
-    const [neiVis, setNeiVis] = useState(false);
     const [ftBaziInfo, setFtBaziInfo] = useReducer(fantuiReducer, {
         nianGan: '甲',
         nianZhi: '辰',
@@ -95,6 +88,7 @@ export default function HomeScreen({navigation}) {
         shiZhi: '午'
     });
     const [ftRes, setFtRes] = useState([]);
+    const [isSaveEnabled, setIsSaveEnabled] = useState(true);
 
     const handleCalaFantui = () => {
         var l = Lunar1().Solar.fromBaZi(ftBaziInfo.nianGan + ftBaziInfo.nianZhi, ftBaziInfo.yueGan + ftBaziInfo.yueZhi, ftBaziInfo.riGan + ftBaziInfo.riZhi, ftBaziInfo.shiGan + ftBaziInfo.shiZhi);
@@ -103,6 +97,7 @@ export default function HomeScreen({navigation}) {
             let d = l[i];
             ftres.push(d.toFullString());
         }
+        console.log(ftres);
         setFtRes(ftres);
     };
 
@@ -112,7 +107,7 @@ export default function HomeScreen({navigation}) {
     const onSelectTime = () => {
         setTimeSelectVis(true);
     };
-    const handleComfirmDate = date => {
+    const handleComfirmDate = (e, date) => {
         // form表单中的date和计算八字的date分别使用；
         if (dateType == 'lunar') {
             const [year, month, day] = moment(currentDate)
@@ -160,7 +155,7 @@ export default function HomeScreen({navigation}) {
         const DATETIMETEM = extractDateAndTime(e);
         setCurrentDate(DATETIMETEM.date);
         setCurrentDate(DATETIMETEM.time);
-        handleComfirmDate(DATETIMETEM.date);
+        handleComfirmDate('', DATETIMETEM.date);
         handleComfirmTime(DATETIMETEM.time);
         setFantuiModalVis(false);
     };
@@ -235,61 +230,10 @@ export default function HomeScreen({navigation}) {
     /**********************
     命理八字计算
     **********************/
-    function ML_calc() {
+    async function ML_calc() {
         const lu = Lunar1().Lunar.fromDate(moment(solarDate + ' ' + inputFrom.inputTime, 'YYYY-M-D H').toDate());
         var d = lu.getEightChar();
-        // 运
-        var dayun = [];
-        var yun = d.getYun(gender === 'male' ? 1 : 0);
-        const getDaYun = yun.getDaYun();
-        for (let i = 0; i < 8; i++) {
-            dayun.push({
-                qiyun: '出生' + yun.getStartYear() + '年' + yun.getStartMonth() + '个月' + yun.getStartDay() + '天后起运',
-                ganzhi: getDaYun[i].getGanZhi(),
-                startYear: getDaYun[i].getStartYear(),
-                endYear: getDaYun[i].getEndYear(),
-                startAge: getDaYun[i].getStartAge(),
-                endAge: getDaYun[i].getEndAge(),
-                liuNian: getDaYun[i].getLiuNian(),
-                xiaoYun: getDaYun[i].getXiaoYun()
-            });
-        }
-        // 藏干
-        let canggan = {
-            year: {wuxing: d.getYearHideGan(), shishen: d.getYearShiShenZhi()},
-            month: {wuxing: d.getMonthHideGan(), shishen: d.getMonthShiShenZhi()},
-            day: {wuxing: d.getDayHideGan(), shishen: d.getDayShiShenZhi()},
-            time: {wuxing: d.getTimeHideGan(), shishen: d.getTimeShiShenZhi()}
-        };
-        // 十神
-        let shishen = {
-            year: d.getYearShiShenGan(),
-            month: d.getMonthShiShenGan(),
-            day: d.getDayShiShenGan(),
-            time: d.getTimeShiShenGan()
-        };
-        // 纳音
-        let nayin = {
-            year: d.getYearNaYin(),
-            month: d.getMonthNaYin(),
-            day: d.getDayNaYin(),
-            time: d.getTimeNaYin()
-        };
-        // 胎元 命宫 身宫
-        let taiyuan = d.getTaiYuan();
-        let minggong = d.getMingGong();
-        let shengong = d.getShenGong();
-        // 节气
-        let jieqi;
-        const [lunarCml_y, lunarCml_m, lunarCml_d] = lunarDate.split(/[-\s:]/);
-        var d = Lunar1().Lunar.fromYmd(lunarCml_y, lunarCml_m, lunarCml_d);
-        if (d.getCurrentJieQi()) {
-            jieqi = '出生于' + d.getCurrentJieQi()._p.name + '0天';
-        } else {
-            let prev = d.getPrevJieQi(false);
-            let diff = moment(solarDate + ' ' + inputFrom.inputTime).diff(moment(prev.getSolar().toYmdHms()), 'days');
-            jieqi = '出生于' + prev.getName() + '后' + diff + '天';
-        }
+
         // ---------------------我是分割-----------------------
         // form表单中的date有时是阴历，有时是阳历；这里使用排盘专用的阳历
         const [Cml_y, Cml_m, Cml_d] = solarDate.split(/[-\s:]/);
@@ -299,16 +243,11 @@ export default function HomeScreen({navigation}) {
         var t = timeStr2hour(Cml_his);
         var jd = JD.JD(year2Ayear(Cml_y), Cml_m - 0, Cml_d - 0 + t / 24);
         obb.mingLiBaZi(jd + curTZ / 24 - J2000, Cp11_J / radd, ob); //八字计算
-        // getLunar(Cml_y, Cml_m);
         setBazi(ob);
         const res = '<font color=red>  <b>[日标]：</b></font>' + '公历 ' + Cml_y + '-' + Cml_m + '-' + Cml_d + ' 儒略日数 ' + int2(jd + 0.5) + ' 距2000年首' + int2(jd + 0.5 - J2000) + '日<br>' + '<font color=red  ><b>[八字]：</b></font>' + ob.bz_jn + '年 ' + ob.bz_jy + '月 ' + ob.bz_jr + '日 ' + ob.bz_js + '时 真太阳 <font color=red>' + ob.bz_zty + '</font><br>' + '<font color=green><b>[纪时]：</b></font><i>' + ob.bz_JS + '</i><br>' + '<font color=green><b>[时标]：</b></font><i>' + '23　 01　 03　 05　 07　 09　 11　 13　 15　 17　 19　 21　 23';
         setMl_result(res);
-        // const dayun = getDaYun(gender, ob.bz_jy, ob.bz_jr);
-        // getNianLi(Cml_y);
-        const shensha = getShenSha(ob, gender);
-        navigation.navigate('八字盘', {navigationParams: {ob, dayun, res: {solarDate: solarDate + '  ' + Cml_his, lunarDate: lunarDate + '  ' + Cml_his, jieqi, canggan, shishen, nayin, gender, taiyuan, minggong, shengong, shensha}}});
+        navigation.navigate('八字盘', {navigationParams: {solarDate: solarDate + '  ' + Cml_his, lunarDate: lunarDate + '  ' + Cml_his, nickname: inputFrom.inputName, place: inputFrom.inputPlace, gender}});
     }
-    //ML_calc(); //在时间、地标初始化完成后就可执行
 
     function getNianLi(y) {
         let res1 = nianLiHTML(y, '');
@@ -337,195 +276,205 @@ export default function HomeScreen({navigation}) {
         return s;
     }
 
+    const toggleSwitch = () => {
+        setIsSaveEnabled(!isSaveEnabled);
+    };
+
     return (
-        <ScrollView style={styles.homeWrapper}>
-            {/* <!--命理八字--> */}
-            <View style={styles.inputInfo}>
-                <View style={styles.selectButtons}>
-                    <View style={styles.genderWrapper}>
-                        <TouchableOpacity style={[gender === 'male' ? styles.activeButton : styles.unActiveButton, {borderTopLeftRadius: 5, borderBottomLeftRadius: 5}]} onPress={selectMale} activeOpacity={1}>
-                            <Text style={gender === 'male' ? styles.activeGenderText : styles.unActiveGenderText}>{'男'}</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={[gender === 'female' ? styles.activeButton : styles.unActiveButton, {borderTopRightRadius: 5, borderBottomRightRadius: 5}]} onPress={selectFemale} activeOpacity={1}>
-                            <Text style={gender === 'female' ? styles.activeGenderText : styles.unActiveGenderText}>{'女'}</Text>
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.genderWrapper}>
-                        <TouchableOpacity
-                            style={[dateType === 'gregorian' ? styles.activeButton : styles.unActiveButton, {borderTopLeftRadius: 5, borderBottomLeftRadius: 5}]}
-                            onPress={() => {
-                                setDateType('gregorian');
-                            }}
-                            activeOpacity={1}>
-                            <Text style={dateType === 'gregorian' ? styles.activeGenderText : styles.unActiveGenderText}>{'公历'}</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={[dateType === 'lunar' ? styles.activeButton : styles.unActiveButton, {borderRightWidth: 0, borderLeftWidth: 0}]} onPress={() => setDateType('lunar')} activeOpacity={1}>
-                            <Text style={dateType === 'lunar' ? styles.activeGenderText : styles.unActiveGenderText}>{'农历'}</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={[dateType === 'fantui' ? styles.activeButton : styles.unActiveButton, {borderTopRightRadius: 5, borderBottomRightRadius: 5}]} onPress={() => handleChangeDateType('fantui')} activeOpacity={1}>
-                            <Text style={dateType === 'fantui' ? styles.activeGenderText : styles.unActiveGenderText}>{'反推'}</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-                <TouchableWithoutFeedback onPress={onSelectDate}>
-                    {/* 点击这个 View 区域会触发 openModal 函数 */}
-                    <View style={styles.inputContainer}>
-                        <TextInput value={inputFrom.inputDate} editable={false} placeholder="日期" pointerEvents="none" style={styles.formItem} />
-                    </View>
-                </TouchableWithoutFeedback>
-                <TouchableWithoutFeedback onPress={onSelectTime}>
-                    {/* 点击这个 View 区域会触发 openModal 函数 */}
-                    <View style={styles.inputContainer}>
-                        <TextInput value={inputFrom.inputTime} editable={false} placeholder="时间" pointerEvents="none" style={styles.formItem} />
-                    </View>
-                </TouchableWithoutFeedback>
-                <View style={styles.inputContainer}>
-                    <TextInput value={inputFrom.inputPlace} editable={false} placeholder="地点" pointerEvents="none" style={styles.formItem} />
-                </View>
-                <View style={styles.inputContainer}>
-                    <TextInput value={inputFrom.inputName} editable={false} placeholder="姓名" pointerEvents="none" style={styles.formItem} />
-                </View>
-            </View>
-            {/* <View style={styles.buttonBox}>
-                <Button title="开始排盘" onPress={ML_calc} color="#000" />
+        <SafeAreaView style={styles.homeWrapper}>
+            {/* <View style={styles.header}>
+                <Text style={styles.headerText}>Custom Header</Text>
             </View> */}
-            <TouchableOpacity style={styles.button} onPress={ML_calc}>
-                <Text style={styles.buttonText}>{'开始排盘'}</Text>
-            </TouchableOpacity>
-            <Modal
-                isVisible={dateSelectVis}
-                style={styles.modal}
-                onBackdropPress={() => {
-                    setDateSelectVis(false);
-                    setFtRes([]);
-                }}>
-                <View style={styles.modalBox}>
-                    <DateTimePicker value={currentDate} onChange={onDateChange} display="spinner" mode="date" />
-                    <Button title="确定" onPress={handleComfirmDate} />
-                </View>
-            </Modal>
-            <Modal isVisible={timeSelectVis} style={styles.modal} onBackdropPress={() => setTimeSelectVis(false)}>
-                <View style={styles.modalBox}>
-                    <DateTimePicker value={currentTime} onChange={onTimeChange} display="spinner" mode="time" />
-                    <Button title="确定" onPress={() => handleComfirmTime()} />
-                </View>
-            </Modal>
-            <Modal isVisible={fantuiModalVis} style={styles.modal} onBackdropPress={() => setFantuiModalVis(false)}>
-                <View style={styles.modalBox}>
-                    <View style={[styles.modalFtRes, styles.ml16]}>
-                        {ftRes.map(e => {
-                            return (
-                                <TouchableOpacity onPress={() => linkToBazi(e)} style={styles.ftResItem}>
-                                    <Text>{e}</Text>
-                                </TouchableOpacity>
-                            );
-                        })}
-                    </View>
-                    <View style={styles.flexContainer}>
-                        <View style={styles.containerColumn}>
-                            <View>
-                                <Text style={[styles.middleFont, styles.mb16, styles.mt16]}>年柱</Text>
-                            </View>
-                            <View style={styles.mb16}>
-                                <SelectDropdown
-                                    data={Gan}
-                                    buttonStyle={{width: 60, height: 60, borderRadius: 30}}
-                                    defaultButtonText={ftBaziInfo.nianGan}
-                                    onSelect={(selectedItem, index) => {
-                                        setFtBaziInfo({type: 'UPDATE_NIANGAN', payload: selectedItem});
-                                    }}
-                                />
-                            </View>
-                            <View style={styles.mb16}>
-                                <SelectDropdown
-                                    data={YangGan.indexOf(ftBaziInfo.nianGan) === -1 ? YinZhi : YangZhi}
-                                    buttonStyle={{width: 60, height: 60, borderRadius: 30}}
-                                    defaultButtonText={ftBaziInfo.nianZhi}
-                                    onSelect={(selectedItem, index) => {
-                                        setFtBaziInfo({type: 'UPDATE_NIANZHI', payload: selectedItem});
-                                    }}
-                                />
-                            </View>
+            {/* <!--命理八字--> */}
+            <View style={styles.contentWrapper}>
+                <View style={styles.inputInfo}>
+                    <View style={styles.selectButtons}>
+                        <View style={styles.genderWrapper}>
+                            <TouchableOpacity style={[gender === 'male' ? styles.activeButton : styles.unActiveButton, {borderTopLeftRadius: 5, borderBottomLeftRadius: 5}]} onPress={selectMale} activeOpacity={1}>
+                                <Text style={gender === 'male' ? styles.activeGenderText : styles.unActiveGenderText}>{'男'}</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[gender === 'female' ? styles.activeButton : styles.unActiveButton, {borderTopRightRadius: 5, borderBottomRightRadius: 5}]} onPress={selectFemale} activeOpacity={1}>
+                                <Text style={gender === 'female' ? styles.activeGenderText : styles.unActiveGenderText}>{'女'}</Text>
+                            </TouchableOpacity>
                         </View>
-                        <View style={styles.containerColumn}>
-                            <View>
-                                <Text style={[styles.middleFont, styles.mb16, styles.mt16]}>月柱</Text>
-                            </View>
-                            <View style={styles.mb16}>
-                                <SelectDropdown
-                                    data={Gan}
-                                    buttonStyle={{width: 60, height: 60, borderRadius: 30}}
-                                    defaultButtonText={ftBaziInfo.yueGan}
-                                    onSelect={(selectedItem, index) => {
-                                        setFtBaziInfo({type: 'UPDATE_YUEGAN', payload: selectedItem});
-                                    }}
-                                />
-                            </View>
-                            <View style={styles.mb16}>
-                                <SelectDropdown
-                                    data={YangGan.indexOf(ftBaziInfo.yueGan) === -1 ? YinZhi : YangZhi}
-                                    buttonStyle={{width: 60, height: 60, borderRadius: 30}}
-                                    defaultButtonText={ftBaziInfo.yueZhi}
-                                    onSelect={(selectedItem, index) => {
-                                        setFtBaziInfo({type: 'UPDATE_YUEZHI', payload: selectedItem});
-                                    }}
-                                />
-                            </View>
-                        </View>
-                        <View style={styles.containerColumn}>
-                            <View>
-                                <Text style={[styles.middleFont, styles.mb16, styles.mt16]}>日柱</Text>
-                            </View>
-                            <View style={styles.mb16}>
-                                <SelectDropdown
-                                    data={Gan}
-                                    buttonStyle={{width: 60, height: 60, borderRadius: 30}}
-                                    defaultButtonText={ftBaziInfo.riGan}
-                                    onSelect={(selectedItem, index) => {
-                                        setFtBaziInfo({type: 'UPDATE_RIGAN', payload: selectedItem});
-                                    }}
-                                />
-                            </View>
-                            <View style={styles.mb16}>
-                                <SelectDropdown
-                                    data={YangGan.indexOf(ftBaziInfo.riGan) === -1 ? YinZhi : YangZhi}
-                                    buttonStyle={{width: 60, height: 60, borderRadius: 30}}
-                                    defaultButtonText={ftBaziInfo.riZhi}
-                                    onSelect={(selectedItem, index) => {
-                                        setFtBaziInfo({type: 'UPDATE_RIZHI', payload: selectedItem});
-                                    }}
-                                />
-                            </View>
-                        </View>
-                        <View style={styles.containerColumn}>
-                            <View>
-                                <Text style={[styles.middleFont, styles.mb16, styles.mt16]}>时柱</Text>
-                            </View>
-                            <View style={styles.mb16}>
-                                <SelectDropdown
-                                    data={Gan}
-                                    buttonStyle={{width: 60, height: 60, borderRadius: 30}}
-                                    defaultButtonText={ftBaziInfo.shiGan}
-                                    onSelect={(selectedItem, index) => {
-                                        setFtBaziInfo({type: 'UPDATE_SHIGAN', payload: selectedItem});
-                                    }}
-                                />
-                            </View>
-                            <View style={styles.mb16}>
-                                <SelectDropdown
-                                    data={YangGan.indexOf(ftBaziInfo.shiGan) === -1 ? YinZhi : YangZhi}
-                                    buttonStyle={{width: 60, height: 60, borderRadius: 30}}
-                                    defaultButtonText={ftBaziInfo.shiZhi}
-                                    onSelect={(selectedItem, index) => {
-                                        setFtBaziInfo({type: 'UPDATE_SHIZHI', payload: selectedItem});
-                                    }}
-                                />
-                            </View>
+                        <View style={styles.genderWrapper}>
+                            <TouchableOpacity
+                                style={[dateType === 'gregorian' ? styles.activeButton : styles.unActiveButton, {borderTopLeftRadius: 5, borderBottomLeftRadius: 5}]}
+                                onPress={() => {
+                                    setDateType('gregorian');
+                                }}
+                                activeOpacity={1}>
+                                <Text style={dateType === 'gregorian' ? styles.activeGenderText : styles.unActiveGenderText}>{'公历'}</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[dateType === 'lunar' ? styles.activeButton : styles.unActiveButton, {borderRightWidth: 0, borderLeftWidth: 0}]} onPress={() => setDateType('lunar')} activeOpacity={1}>
+                                <Text style={dateType === 'lunar' ? styles.activeGenderText : styles.unActiveGenderText}>{'农历'}</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[dateType === 'fantui' ? styles.activeButton : styles.unActiveButton, {borderTopRightRadius: 5, borderBottomRightRadius: 5}]} onPress={() => handleChangeDateType('fantui')} activeOpacity={1}>
+                                <Text style={dateType === 'fantui' ? styles.activeGenderText : styles.unActiveGenderText}>{'反推'}</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
-                    <Button title="确定" onPress={handleCalaFantui} />
+                    <TouchableWithoutFeedback onPress={onSelectDate}>
+                        {/* 点击这个 View 区域会触发 openModal 函数 */}
+                        <View style={styles.inputContainer}>
+                            <TextInput value={inputFrom.inputDate} editable={false} placeholder="日期" pointerEvents="none" style={styles.formItem} />
+                        </View>
+                    </TouchableWithoutFeedback>
+                    <TouchableWithoutFeedback onPress={onSelectTime}>
+                        {/* 点击这个 View 区域会触发 openModal 函数 */}
+                        <View style={styles.inputContainer}>
+                            <TextInput value={inputFrom.inputTime} editable={false} placeholder="时间" pointerEvents="none" style={styles.formItem} />
+                        </View>
+                    </TouchableWithoutFeedback>
+                    <View style={styles.inputContainer}>
+                        <TextInput value={inputFrom.inputPlace} editable={false} placeholder="地点" pointerEvents="none" style={styles.formItem} />
+                    </View>
+                    {/* <View style={styles.inputContainer}> */}
+                    <TextInput value={inputFrom.inputName} onChangeText={text => dispatch({type: 'UPDATE_NAME', payload: text})} placeholder="姓名" style={styles.formItem} />
+                    {/* </View> */}
                 </View>
-            </Modal>
-        </ScrollView>
+                <TouchableOpacity style={styles.button} onPress={ML_calc}>
+                    <Text style={styles.buttonText}>{'开始排盘'}</Text>
+                </TouchableOpacity>
+                <View style={styles.savePaipan}>
+                    <Text>保存：</Text>
+                    <Switch style={styles.saveSwitch} trackColor={{false: '#767577', true: '#81b0ff'}} thumbColor={isSaveEnabled ? '#f5dd4b' : '#f4f3f4'} ios_backgroundColor="#3e3e3e" onValueChange={toggleSwitch} value={isSaveEnabled} />
+                </View>
+                <Modal
+                    isVisible={dateSelectVis}
+                    style={styles.modal}
+                    onBackdropPress={() => {
+                        setDateSelectVis(false);
+                        setFtRes([]);
+                    }}>
+                    <View style={styles.modalBox}>
+                        <DateTimePicker value={currentDate} onChange={onDateChange} display="spinner" mode="date" />
+                        <Button title="确定" onPress={handleComfirmDate} />
+                    </View>
+                </Modal>
+                <Modal isVisible={timeSelectVis} style={styles.modal} onBackdropPress={() => setTimeSelectVis(false)}>
+                    <View style={styles.modalBox}>
+                        <DateTimePicker value={currentTime} onChange={onTimeChange} display="spinner" mode="time" />
+                        <Button title="确定" onPress={() => handleComfirmTime()} />
+                    </View>
+                </Modal>
+                <Modal isVisible={fantuiModalVis} style={styles.modal} onBackdropPress={() => setFantuiModalVis(false)}>
+                    <View style={styles.modalBox}>
+                        <View style={[styles.modalFtRes, styles.ml16]}>
+                            {ftRes.map(e => {
+                                return (
+                                    <TouchableOpacity onPress={() => linkToBazi(e)} style={styles.ftResItem}>
+                                        <Text>{e}</Text>
+                                    </TouchableOpacity>
+                                );
+                            })}
+                        </View>
+                        <View style={styles.flexContainer}>
+                            <View style={styles.containerColumn}>
+                                <View>
+                                    <Text style={[styles.middleFont, styles.mb16, styles.mt16]}>年柱</Text>
+                                </View>
+                                <View style={styles.mb16}>
+                                    <SelectDropdown
+                                        data={Gan}
+                                        buttonStyle={{width: 60, height: 60, borderRadius: 30}}
+                                        defaultButtonText={ftBaziInfo.nianGan}
+                                        onSelect={(selectedItem, index) => {
+                                            setFtBaziInfo({type: 'UPDATE_NIANGAN', payload: selectedItem});
+                                        }}
+                                    />
+                                </View>
+                                <View style={styles.mb16}>
+                                    <SelectDropdown
+                                        data={YangGan.indexOf(ftBaziInfo.nianGan) === -1 ? YinZhi : YangZhi}
+                                        buttonStyle={{width: 60, height: 60, borderRadius: 30}}
+                                        defaultButtonText={ftBaziInfo.nianZhi}
+                                        onSelect={(selectedItem, index) => {
+                                            setFtBaziInfo({type: 'UPDATE_NIANZHI', payload: selectedItem});
+                                        }}
+                                    />
+                                </View>
+                            </View>
+                            <View style={styles.containerColumn}>
+                                <View>
+                                    <Text style={[styles.middleFont, styles.mb16, styles.mt16]}>月柱</Text>
+                                </View>
+                                <View style={styles.mb16}>
+                                    <SelectDropdown
+                                        data={Gan}
+                                        buttonStyle={{width: 60, height: 60, borderRadius: 30}}
+                                        defaultButtonText={ftBaziInfo.yueGan}
+                                        onSelect={(selectedItem, index) => {
+                                            setFtBaziInfo({type: 'UPDATE_YUEGAN', payload: selectedItem});
+                                        }}
+                                    />
+                                </View>
+                                <View style={styles.mb16}>
+                                    <SelectDropdown
+                                        data={YangGan.indexOf(ftBaziInfo.yueGan) === -1 ? YinZhi : YangZhi}
+                                        buttonStyle={{width: 60, height: 60, borderRadius: 30}}
+                                        defaultButtonText={ftBaziInfo.yueZhi}
+                                        onSelect={(selectedItem, index) => {
+                                            setFtBaziInfo({type: 'UPDATE_YUEZHI', payload: selectedItem});
+                                        }}
+                                    />
+                                </View>
+                            </View>
+                            <View style={styles.containerColumn}>
+                                <View>
+                                    <Text style={[styles.middleFont, styles.mb16, styles.mt16]}>日柱</Text>
+                                </View>
+                                <View style={styles.mb16}>
+                                    <SelectDropdown
+                                        data={Gan}
+                                        buttonStyle={{width: 60, height: 60, borderRadius: 30}}
+                                        defaultButtonText={ftBaziInfo.riGan}
+                                        onSelect={(selectedItem, index) => {
+                                            setFtBaziInfo({type: 'UPDATE_RIGAN', payload: selectedItem});
+                                        }}
+                                    />
+                                </View>
+                                <View style={styles.mb16}>
+                                    <SelectDropdown
+                                        data={YangGan.indexOf(ftBaziInfo.riGan) === -1 ? YinZhi : YangZhi}
+                                        buttonStyle={{width: 60, height: 60, borderRadius: 30}}
+                                        defaultButtonText={ftBaziInfo.riZhi}
+                                        onSelect={(selectedItem, index) => {
+                                            setFtBaziInfo({type: 'UPDATE_RIZHI', payload: selectedItem});
+                                        }}
+                                    />
+                                </View>
+                            </View>
+                            <View style={styles.containerColumn}>
+                                <View>
+                                    <Text style={[styles.middleFont, styles.mb16, styles.mt16]}>时柱</Text>
+                                </View>
+                                <View style={styles.mb16}>
+                                    <SelectDropdown
+                                        data={Gan}
+                                        buttonStyle={{width: 60, height: 60, borderRadius: 30}}
+                                        defaultButtonText={ftBaziInfo.shiGan}
+                                        onSelect={(selectedItem, index) => {
+                                            setFtBaziInfo({type: 'UPDATE_SHIGAN', payload: selectedItem});
+                                        }}
+                                    />
+                                </View>
+                                <View style={styles.mb16}>
+                                    <SelectDropdown
+                                        data={YangGan.indexOf(ftBaziInfo.shiGan) === -1 ? YinZhi : YangZhi}
+                                        buttonStyle={{width: 60, height: 60, borderRadius: 30}}
+                                        defaultButtonText={ftBaziInfo.shiZhi}
+                                        onSelect={(selectedItem, index) => {
+                                            setFtBaziInfo({type: 'UPDATE_SHIZHI', payload: selectedItem});
+                                        }}
+                                    />
+                                </View>
+                            </View>
+                        </View>
+                        <Button title="确定" onPress={handleCalaFantui} />
+                    </View>
+                </Modal>
+            </View>
+        </SafeAreaView>
     );
 }

@@ -10,6 +10,7 @@
         "test": "jest"
     },
     "dependencies": {
+        "@react-native-async-storage/async-storage": "^2.0.0",
         "@react-native-community/datetimepicker": "^7.6.2",
         "@react-native-picker/picker": "^2.6.1",
         "@react-navigation/bottom-tabs": "^6.5.11",
@@ -24,6 +25,7 @@
         "react-hook-form": "^7.48.2",
         "react-native": "0.72.7",
         "react-native-datepicker": "^1.7.2",
+        "react-native-device-info": "^11.1.0",
         "react-native-modal": "^13.0.1",
         "react-native-modal-datetime-picker": "^17.1.0",
         "react-native-pager-view": "^6.3.3",
@@ -33,7 +35,8 @@
         "react-native-select-dropdown": "^3.4.0",
         "react-native-svg": "^15.4.0",
         "react-native-wechat-lib": "^1.1.27",
-        "yarn": "^1.22.21"
+        "yarn": "^1.22.21",
+        "zustand": "^4.5.5"
     },
     "devDependencies": {
         "@babel/core": "^7.20.0",

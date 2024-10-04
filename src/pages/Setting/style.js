@@ -1,8 +1,8 @@
 import {View, Button, Text, DatePickerIOS, Platform} from 'react-native';
 const styles = {
     settingWrapper: {
-        fontSize: 20,
-        backgroundColor: '#fff'
+        flex: 1,
+        fontSize: 12
     },
     userInfo: {
         display: 'flex',
@@ -14,7 +14,7 @@ const styles = {
         paddingRight: 16,
         paddingBottom: 32,
         justifyContent: 'space-between',
-        backgroundColor: '#fff7a3'
+        backgroundColor: '#f5dd4b80'
     },
     infoLeft: {
         flexDirection: 'row',
@@ -30,6 +30,14 @@ const styles = {
         fontSize: 18,
         fontWeight: 500
     },
+    tabsButton: {
+        width: 60,
+        justifyContent: 'center', // Vertically center the content
+        alignItems: 'center',
+        paddingTop: 8,
+        paddingBottom: 8,
+        color: '#000'
+    },
     button: {
         margin: 5,
         backgroundColor: 'white',
@@ -41,24 +49,43 @@ const styles = {
         height: 28
     },
     container: {
-        backgroundColor: '#fff',
         flex: 1,
+        flexDirection: 'column',
         borderRadius: 16,
         padding: 16,
-        marginTop: -16
+        marginTop: -16,
+        backgroundColor: '#fff'
     },
     tabs: {
         flexDirection: 'row',
-        gap: 8
+        flex: '0 1 auto',
+        marginBottom: 16
     },
     pagerView: {
-        flex: 1,
-        width: 300,
-        height: '100%'
+        flex: 1
     },
-    page: {
-        width: 300,
-        height: 300
+    pagetext: {
+        paddingTop: 32
+    },
+    buttonTextHl: {
+        fontSize: 16,
+        fontWeight: 500
+    },
+    buttonText: {
+        fontSize: 16,
+        color: 'rgba(0,0,0,.45)'
+    },
+    highlightBarWrapper: {
+        width: 60,
+        position: 'absolute',
+        bottom: 0,
+        alignItems: 'center',
+        textAlign: 'center'
+    },
+    highlightBar: {
+        width: 25, // Width of the highlight bar should match the width of the tab button
+        height: 2, // Height of the highlight bar
+        backgroundColor: '#000'
     }
 };
 export default styles;

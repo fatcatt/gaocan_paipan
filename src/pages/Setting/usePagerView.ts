@@ -1,8 +1,9 @@
 import type {default as PagerView} from 'react-native-pager-view';
-import React, {useRef, useCallback} from 'react';
+import React, {useRef, useCallback, useState} from 'react';
 
 export default function usePagerView() {
     const pagerRef = useRef<PagerView>(null);
+    const [page, setCurrentPage] = useState(0);
 
     const setPage = useCallback((page: number, animated = true) => {
         if (animated) {
@@ -12,11 +13,13 @@ export default function usePagerView() {
             console.log(pagerRef.current);
             pagerRef.current?.setPageWithoutAnimation(page);
         }
+        setCurrentPage(page);
         console.log('setPage', page);
     }, []);
 
     return {
         pagerRef,
-        setPage
+        setPage,
+        page
     };
 }
