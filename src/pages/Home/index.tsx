@@ -1,18 +1,19 @@
-import {ScrollView, View, Text, TextInput, Button, TouchableWithoutFeedback, TouchableOpacity, Switch, SafeAreaView} from 'react-native';
+import {ScrollView, View, Text, TextInput, Button, TouchableWithoutFeedback, TouchableOpacity, Alert, SafeAreaView, Platform} from 'react-native';
 import React, {useEffect, useState, useReducer} from 'react';
-import {Lunar, nianLi2HTML, nianLiHTML, obb} from '../../utils/lunar.js';
 import {JD, J2000, radd, int2, rad2str2} from '../../utils/eph0.js';
 import {SZJ} from '../../utils/eph.js';
 import {SQv, JWv} from '../../utils/JW.js';
 import {addOp, year2Ayear, storageL, timeStr2hour} from '../../utils/tools.js';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
 import Modal from 'react-native-modal';
 import styles from './style.js';
 import moment from 'moment';
-import {Gan, YangGan, YangZhi, YinZhi} from '../../constants';
+import {Gan, YangGan, YangZhi, YinZhi} from '../../utils/constants/shensha';
 import calendar from 'js-calendar-converter';
 import {Lunar1} from '../../utils/lunar1';
 import SelectDropdown from 'react-native-select-dropdown';
+import Clipboard from '@react-native-clipboard/clipboard';
 // import {Lunar1} from '../../../lll.js';
 const reducer = (inputFrom, action) => {
     switch (action.type) {
@@ -88,7 +89,7 @@ export default function HomeScreen({navigation}) {
         shiZhi: '午'
     });
     const [ftRes, setFtRes] = useState([]);
-    const [isSaveEnabled, setIsSaveEnabled] = useState(true);
+    const [contact, setContact] = useState('');
 
     const handleCalaFantui = () => {
         var l = Lunar1().Solar.fromBaZi(ftBaziInfo.nianGan + ftBaziInfo.nianZhi, ftBaziInfo.yueGan + ftBaziInfo.yueZhi, ftBaziInfo.riGan + ftBaziInfo.riZhi, ftBaziInfo.shiGan + ftBaziInfo.shiZhi);
@@ -97,20 +98,43 @@ export default function HomeScreen({navigation}) {
             let d = l[i];
             ftres.push(d.toFullString());
         }
-        console.log(ftres);
         setFtRes(ftres);
     };
 
     const onSelectDate = () => {
-        setDateSelectVis(true);
+        if (Platform.OS === 'android') {
+            launchAndroidDate();
+        } else {
+            setDateSelectVis(true);
+        }
+    };
+    const launchAndroidDate = () => {
+        DateTimePickerAndroid.open({
+            value: currentDate,
+            onChange: onDateChange,
+            display: 'spinner',
+            mode: 'date'
+        });
+    };
+    const launchAndroidTime = () => {
+        DateTimePickerAndroid.open({
+            value: currentDate,
+            onChange: onTimeChange,
+            display: 'spinner',
+            mode: 'time'
+        });
     };
     const onSelectTime = () => {
-        setTimeSelectVis(true);
+        if (Platform.OS === 'android') {
+            launchAndroidTime();
+        } else {
+            setTimeSelectVis(true);
+        }
     };
     const handleComfirmDate = (e, date) => {
         // form表单中的date和计算八字的date分别使用；
         if (dateType == 'lunar') {
-            const [year, month, day] = moment(currentDate)
+            const [year, month, day] = moment(date ? date : currentDate)
                 .format('YYYY-MM-DD')
                 .split(/[-\s:]/);
             const grego = calendar.lunar2solar(year, month, day);
@@ -129,15 +153,26 @@ export default function HomeScreen({navigation}) {
         setDateSelectVis(false);
     };
     const handleComfirmTime = (time?) => {
-        console.log(moment(currentTime).format('HH:mm'));
         dispatch({type: 'UPDATE_TIME', payload: time ? time : moment(currentTime).format('HH:mm')});
         setTimeSelectVis(false);
     };
     const onDateChange = (e, date) => {
         setCurrentDate(date);
+        console.log(date);
+        if (Platform.OS === 'android') {
+            // 选择了时间，更新状态并关闭弹窗
+            handleComfirmDate(e, date);
+            setDateSelectVis(false);
+        }
     };
     const onTimeChange = (e, time) => {
         setCurrentTime(time);
+        if (Platform.OS === 'android') {
+            setTimeSelectVis(false);
+            setTimeout(() => {
+                dispatch({type: 'UPDATE_TIME', payload: moment(time).format('HH:mm')});
+            }, 0);
+        }
     };
     const selectMale = () => {
         setGender('male');
@@ -153,8 +188,10 @@ export default function HomeScreen({navigation}) {
     };
     const linkToBazi = e => {
         const DATETIMETEM = extractDateAndTime(e);
-        setCurrentDate(DATETIMETEM.date);
-        setCurrentDate(DATETIMETEM.time);
+        const [year, month, day] = DATETIMETEM.date.split('-');
+        const date = new Date(year, month - 1, day); // month is zero-indexed
+        setCurrentDate(date);
+        setCurrentTime(DATETIMETEM.time);
         handleComfirmDate('', DATETIMETEM.date);
         handleComfirmTime(DATETIMETEM.time);
         setFantuiModalVis(false);
@@ -176,7 +213,6 @@ export default function HomeScreen({navigation}) {
 
         return {date: date, time: time};
     }
-    var lun = new Lunar(); //月历全局对象
     var curJD; //现在日期
     var curTZ = -8; //当前时区
 
@@ -242,16 +278,10 @@ export default function HomeScreen({navigation}) {
         var ob = new Object();
         var t = timeStr2hour(Cml_his);
         var jd = JD.JD(year2Ayear(Cml_y), Cml_m - 0, Cml_d - 0 + t / 24);
-        obb.mingLiBaZi(jd + curTZ / 24 - J2000, Cp11_J / radd, ob); //八字计算
         setBazi(ob);
         const res = '<font color=red>  <b>[日标]：</b></font>' + '公历 ' + Cml_y + '-' + Cml_m + '-' + Cml_d + ' 儒略日数 ' + int2(jd + 0.5) + ' 距2000年首' + int2(jd + 0.5 - J2000) + '日<br>' + '<font color=red  ><b>[八字]：</b></font>' + ob.bz_jn + '年 ' + ob.bz_jy + '月 ' + ob.bz_jr + '日 ' + ob.bz_js + '时 真太阳 <font color=red>' + ob.bz_zty + '</font><br>' + '<font color=green><b>[纪时]：</b></font><i>' + ob.bz_JS + '</i><br>' + '<font color=green><b>[时标]：</b></font><i>' + '23　 01　 03　 05　 07　 09　 11　 13　 15　 17　 19　 21　 23';
         setMl_result(res);
         navigation.navigate('八字盘', {navigationParams: {solarDate: solarDate + '  ' + Cml_his, lunarDate: lunarDate + '  ' + Cml_his, nickname: inputFrom.inputName, place: inputFrom.inputPlace, gender}});
-    }
-
-    function getNianLi(y) {
-        let res1 = nianLiHTML(y, '');
-        let res2 = nianLi2HTML(y);
     }
 
     // 此刻
@@ -276,8 +306,13 @@ export default function HomeScreen({navigation}) {
         return s;
     }
 
-    const toggleSwitch = () => {
-        setIsSaveEnabled(!isSaveEnabled);
+    const handlePaste = async () => {
+        try {
+            Clipboard.setString('ZGLQS0401');
+            Alert.alert('复制成功，去微信添加');
+        } catch (error) {
+            // Alert.alert('Error', 'Failed to paste text.');
+        }
     };
 
     return (
@@ -336,35 +371,45 @@ export default function HomeScreen({navigation}) {
                 <TouchableOpacity style={styles.button} onPress={ML_calc}>
                     <Text style={styles.buttonText}>{'开始排盘'}</Text>
                 </TouchableOpacity>
-                <View style={styles.savePaipan}>
-                    <Text>保存：</Text>
-                    <Switch style={styles.saveSwitch} trackColor={{false: '#767577', true: '#81b0ff'}} thumbColor={isSaveEnabled ? '#f5dd4b' : '#f4f3f4'} ios_backgroundColor="#3e3e3e" onValueChange={toggleSwitch} value={isSaveEnabled} />
-                </View>
-                <Modal
-                    isVisible={dateSelectVis}
-                    style={styles.modal}
-                    onBackdropPress={() => {
-                        setDateSelectVis(false);
-                        setFtRes([]);
-                    }}>
-                    <View style={styles.modalBox}>
-                        <DateTimePicker value={currentDate} onChange={onDateChange} display="spinner" mode="date" />
-                        <Button title="确定" onPress={handleComfirmDate} />
-                    </View>
-                </Modal>
-                <Modal isVisible={timeSelectVis} style={styles.modal} onBackdropPress={() => setTimeSelectVis(false)}>
-                    <View style={styles.modalBox}>
-                        <DateTimePicker value={currentTime} onChange={onTimeChange} display="spinner" mode="time" />
-                        <Button title="确定" onPress={() => handleComfirmTime()} />
-                    </View>
-                </Modal>
+                <TouchableOpacity style={styles.contact}>
+                    <Text onPress={handlePaste}>{"点击关注  '天机排盘'"}</Text>
+                </TouchableOpacity>
+                {/* 日期选择器 */}
+                {Platform.OS === 'ios' ? (
+                    <Modal
+                        isVisible={dateSelectVis}
+                        style={styles.modal}
+                        onBackdropPress={() => {
+                            setDateSelectVis(false);
+                            setFtRes([]);
+                        }}>
+                        <View style={styles.modalBox}>
+                            <DateTimePicker value={currentDate} onChange={onDateChange} display="spinner" mode="date" />
+                            {Platform.OS === 'ios' && <Button title="确定" onPress={handleComfirmDate} />}
+                        </View>
+                    </Modal>
+                ) : (
+                    dateSelectVis && <View style={styles.modalBox}>{/* <DateTimePicker value={currentDate} onChange={onDateChange} display="spinner" mode="date" positiveButton={{label: '确定'}} negativeButton={{label: '取消', textColor: 'grey'}} /> */}</View>
+                )}
+                {/* 时间选择器 */}
+                {Platform.OS === 'ios' ? (
+                    <Modal isVisible={timeSelectVis} style={styles.modal} onBackdropPress={() => setTimeSelectVis(false)}>
+                        <View style={styles.modalBox}>
+                            <DateTimePicker value={currentTime} onChange={onTimeChange} display="spinner" mode="time" />
+                            <Button title="确定" onPress={() => handleComfirmTime()} />
+                        </View>
+                    </Modal>
+                ) : (
+                    timeSelectVis && <View style={styles.modalBox}>{/* {<DateTimePicker value={currentTime} onChange={onTimeChange} display="spinner" mode="time" />} */}</View>
+                )}
                 <Modal isVisible={fantuiModalVis} style={styles.modal} onBackdropPress={() => setFantuiModalVis(false)}>
                     <View style={styles.modalBox}>
                         <View style={[styles.modalFtRes, styles.ml16]}>
+                            <Text style={{fontWeight: 500, marginTop: 8}}>请选择：</Text>
                             {ftRes.map(e => {
                                 return (
                                     <TouchableOpacity onPress={() => linkToBazi(e)} style={styles.ftResItem}>
-                                        <Text>{e}</Text>
+                                        <Text style={{fontWeight: 500}}>{e}</Text>
                                     </TouchableOpacity>
                                 );
                             })}

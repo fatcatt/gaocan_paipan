@@ -58,7 +58,9 @@ const styles = {
     },
     tabs: {
         flexDirection: 'row',
-        flex: '0 1 auto',
+        flexGrow: 0,
+        flexShrink: 1,
+        flexBasis: 'auto',
         marginBottom: 16
     },
     pagerView: {
@@ -85,7 +87,10 @@ const styles = {
     highlightBar: {
         width: 25, // Width of the highlight bar should match the width of the tab button
         height: 2, // Height of the highlight bar
-        backgroundColor: '#000'
+        backgroundColor: 'grey'
+    },
+    page: {
+        flex: 1
     }
 };
 export default styles;

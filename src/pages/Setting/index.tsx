@@ -2,7 +2,6 @@ import {ScrollView, View, Text, Animated, Button, Alert, Dimensions, Image, Touc
 import styles from './style.js';
 import React, {Component, useEffect, useState, useRef} from 'react';
 import * as WeChat from 'react-native-wechat-lib';
-import {SvgUri} from 'react-native-svg';
 import PagerView from 'react-native-pager-view';
 import usePagerView from './usePagerView';
 import Record from './Record/index';
@@ -10,6 +9,7 @@ import {getUserData, setUserData, getBaziRecord} from '../../api/index';
 import axios from 'axios';
 import DeviceInfo from 'react-native-device-info';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useFocusEffect} from '@react-navigation/native';
 import {useUserStore} from '../../store/index';
 const screenHeight = Dimensions.get('window').height;
 export default function RNWeChatDemo({navigation}) {
@@ -23,22 +23,43 @@ export default function RNWeChatDemo({navigation}) {
     const translateX = useRef(new Animated.Value(0)).current; // Animated value for the highlight bar
 
     const tabWidth = 60; // Width of each tab button, adjust based on your design
+    useFocusEffect(
+        React.useCallback(() => {
+            const deviceId = DeviceInfo.getDeviceId();
+            DeviceInfo.getUserAgent().then(userAgent => {
+                // console.log(userAgent);
+            });
+            getUnionid();
 
-    useEffect(() => {
-        const deviceId = DeviceInfo.getDeviceId();
-        DeviceInfo.getUserAgent().then(userAgent => {
-            console.log(userAgent);
-        });
-        getUnionid();
+            WeChat.registerApp('wxd2552a5aea69cdc8', 'https://gaocanyixue.com/paipan/');
+            WeChat.isWXAppInstalled().then(res => {
+                // console.log(res);
+            });
+        }, [])
+    );
 
-        // console.log(WeChat);
-        WeChat.registerApp('wxd2552a5aea69cdc8', 'https://gaocanyixue.com/paipan/');
-        WeChat.isWXAppInstalled().then(res => {
-            console.log(res);
-        });
-        // WeChat.openWXApp();
-        // 获取八字记录
-    }, []);
+    const getUnionid = async () => {
+        try {
+            const jsonValue = await AsyncStorage.getItem('unionid');
+            if (jsonValue) {
+                handleFetchUser(jsonValue);
+            }
+            return jsonValue || null;
+        } catch (e) {
+            // error reading value
+        }
+    };
+
+    function handleFetchUser(unionid: string) {
+        getUserData({unionid})
+            .then(async res => {
+                setUserInfo(res);
+                handleGetBaziRecord(res.user_id);
+                setUserId(res.user_id);
+                await AsyncStorage.setItem('userid', res.user_id.toString() || '');
+            })
+            .catch(err => console.log(err));
+    }
 
     const handleGetBaziRecord = user_id => {
         getBaziRecord({userid: user_id}).then(res => {
@@ -46,6 +67,7 @@ export default function RNWeChatDemo({navigation}) {
         });
     };
 
+    // 登录相关
     const handleLogin = () => {
         WeChat.sendAuthRequest('snsapi_userinfo', '')
             .then((response: any) => {
@@ -98,27 +120,6 @@ export default function RNWeChatDemo({navigation}) {
         }
     };
 
-    const getUnionid = async () => {
-        try {
-            const jsonValue = await AsyncStorage.getItem('unionid');
-            if (jsonValue) {
-                handleFetchUser(jsonValue);
-            }
-            return jsonValue || null;
-        } catch (e) {
-            // error reading value
-        }
-    };
-
-    function handleFetchUser(unionid: string) {
-        getUserData({unionid}).then(async res => {
-            setUserInfo(res);
-            handleGetBaziRecord(res.user_id);
-            setUserId(res.user_id);
-            await AsyncStorage.setItem('userid', res.user_id.toString() || '');
-        });
-    }
-
     const setPageInfo = tabNum => {
         setPage(tabNum);
     };
@@ -140,7 +141,7 @@ export default function RNWeChatDemo({navigation}) {
                 <View style={styles.infoLeft}>
                     {userInfo?.headimg_url && <Image source={{uri: `${userInfo.headimg_url}`}} style={styles.userAvatar} />}
                     <Text style={styles.userName}>{userInfo.nickname}</Text>
-                    <Button title="登录" onPress={() => handleLogin()} />
+                    {!userInfo.headimg_url && <Button title="登录" color="#81b0ff" onPress={() => handleLogin()} />}
                 </View>
                 {/* <SvgUri style={styles.setLogo} uri="https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/debian.svg" /> */}
             </View>
@@ -149,12 +150,12 @@ export default function RNWeChatDemo({navigation}) {
                     <TouchableOpacity style={styles.tabsButton} onPress={() => setPageInfo(0)}>
                         <Text style={page === 0 ? styles.buttonTextHl : styles.buttonText}>记录</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.tabsButton} onPress={() => setPageInfo(1)}>
+                    {/* <TouchableOpacity style={styles.tabsButton} onPress={() => setPageInfo(1)}>
                         <Text style={page === 1 ? styles.buttonTextHl : styles.buttonText}>收藏</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.tabsButton} onPress={() => setPageInfo(2)}>
                         <Text style={page === 2 ? styles.buttonTextHl : styles.buttonText}>喜欢</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                     <View style={styles.highlightBarWrapper}>
                         <Animated.View
                             style={[
@@ -174,8 +175,8 @@ export default function RNWeChatDemo({navigation}) {
                         setPageInfo(e.nativeEvent.position);
                     }}
                     onPageScroll={handlePageScroll}>
-                    <View key="1" style={styles.page}>
-                        <Record passingRecords={records} navigation={navigation}></Record>
+                    <View key="1" style={styles.page} style={{flex: 1}}>
+                        {!userInfo.headimg_url ? <Text style={{marginLeft: 16}}>登录后可记录</Text> : <Record passingRecords={records} navigation={navigation}></Record>}
                     </View>
                     <ScrollView key="2" style={styles.page}>
                         <Text style={styles.pagetext}>222Second page</Text>

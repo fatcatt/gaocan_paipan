@@ -1,4 +1,4 @@
-import {YangGan, YangZhi, Gan, Zhi, JiShen, JiShenTrans, XiongShaTrans, XiongSha} from '../constants';
+import {YangGan, YangZhi, Gan, Zhi, JiShen, JiShenTrans, XiongShaTrans, XiongSha, JiShenInterpretation, XiongShaInterpretation} from './constants/shensha';
 function getDaYun(gender, YueGanZhi, RiGanZhi) {
     // 阳男阴女顺排、阴男阳女逆排
     const RiGan = RiGanZhi.slice(0, 1);
@@ -44,7 +44,7 @@ function getShenSha(ob, gender) {
     const riZhi = bz_jr.slice(1, 2);
     const yueZhi = bz_jy.slice(1, 2);
     const nianZhi = bz_jn.slice(1, 2);
-    console.log(JiShenTrans['tianyiguiren'][riGan]);
+
     // 天乙贵人 tianyiguiren
     findJiShen(ob, JiShenTrans['tianyiguiren'][riGan], result, '天乙贵人');
     // 天德 tiande
@@ -94,37 +94,36 @@ function getShenSha(ob, gender) {
     findXiongSha(ob, XiongShaTrans['liuxia'][riGan], result, '流霞');
     // 红艳 hongyan
     findXiongSha(ob, XiongShaTrans['hongyan'][riGan], result, '红艳');
-    console.log(result);
     return result;
 }
 function findJiShen(ob, hitArr, result, shenName) {
     const {bz_jn, bz_jy, bz_jr, bz_js} = ob;
     if (hitArr.includes(bz_jn.slice(1, 2)) || hitArr.includes(bz_jn.slice(0, 1))) {
-        result.year.jishen.push(shenName);
+        result.year.jishen.push({shenName, shenInterpretation: JiShenInterpretation[shenName]});
     }
     if (hitArr.includes(bz_jy.slice(1, 2)) || hitArr.includes(bz_jy.slice(0, 1))) {
-        result.month.jishen.push(shenName);
+        result.month.jishen.push({shenName, shenInterpretation: JiShenInterpretation[shenName]});
     }
     if (hitArr.includes(bz_jr.slice(1, 2)) || hitArr.includes(bz_jr.slice(0, 1))) {
-        result.day.jishen.push(shenName);
+        result.day.jishen.push({shenName, shenInterpretation: JiShenInterpretation[shenName]});
     }
     if (hitArr.includes(bz_js.slice(1, 2)) || hitArr.includes(bz_js.slice(0, 1))) {
-        result.time.jishen.push(shenName);
+        result.time.jishen.push({shenName, shenInterpretation: JiShenInterpretation[shenName]});
     }
 }
-function findXiongSha(ob, hitArr, result, shaName) {
+function findXiongSha(ob, hitArr, result, shenName) {
     const {bz_jn, bz_jy, bz_jr, bz_js} = ob;
     if (hitArr.includes(bz_jn.slice(1, 2)) || hitArr.includes(bz_jn.slice(0, 1))) {
-        result.year.xiongsha.push(shaName);
+        result.year.xiongsha.push({shenName, shenInterpretation: XiongShaInterpretation[shenName]});
     }
     if (hitArr.includes(bz_jy.slice(1, 2)) || hitArr.includes(bz_jy.slice(0, 1))) {
-        result.month.xiongsha.push(shaName);
+        result.month.xiongsha.push({shenName, shenInterpretation: XiongShaInterpretation[shenName]});
     }
     if (hitArr.includes(bz_jr.slice(1, 2)) || hitArr.includes(bz_jr.slice(0, 1))) {
-        result.day.xiongsha.push(shaName);
+        result.day.xiongsha.push({shenName, shenInterpretation: XiongShaInterpretation[shenName]});
     }
     if (hitArr.includes(bz_js.slice(1, 2)) || hitArr.includes(bz_js.slice(0, 1))) {
-        result.time.xiongsha.push(shaName);
+        result.time.xiongsha.push({shenName, shenInterpretation: XiongShaInterpretation[shenName]});
     }
 }
 export {getDaYun, getShenSha};

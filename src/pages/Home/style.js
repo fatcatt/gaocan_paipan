@@ -1,10 +1,12 @@
 import {View, Button, Text, DatePickerIOS, Platform} from 'react-native';
 const styles = {
     contentWrapper: {
-        padding: 12
+        padding: 12,
+        flex: 1
     },
     homeWrapper: {
-        padding: 12
+        padding: 12,
+        flex: 1
     },
     inputLeft: {
         width: 150,
@@ -79,7 +81,8 @@ const styles = {
     },
     modalBox: {
         backgroundColor: '#fff',
-        paddingTop: 8
+        paddingTop: 8,
+        paddingBottom: 16
     },
     formItem: {
         borderBottomWidth: 1,
@@ -149,13 +152,13 @@ const styles = {
     modalnei: {
         height: ' 100%'
     },
-    savePaipan: {
-        marginTop: 20,
+    contact: {
+        flex: 1,
         flexDirection: 'row',
-        alignItems: 'center'
-    },
-    saveSwitch: {
-        transform: [{scaleX: 0.8}, {scaleY: 0.8}]
+        // position: 'absolute',
+        // bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'flex-end'
     }
 };
 export default styles;

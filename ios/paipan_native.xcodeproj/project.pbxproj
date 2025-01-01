@@ -24,6 +24,11 @@
 		85CCB00D2C175E410042D2C8 /* libsqlite3.0.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 85CCB00C2C175E410042D2C8 /* libsqlite3.0.tbd */; };
 		85CCB00F2C175E490042D2C8 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85CCB00E2C175E490042D2C8 /* SystemConfiguration.framework */; };
 		85CCB0112C175E500042D2C8 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85CCB0102C175E500042D2C8 /* CoreTelephony.framework */; };
+		85E6097F2CFC75A800DFED05 /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 85E6097E2CFC75A800DFED05 /* FontAwesome.ttf */; };
+		85E609812CFC75AF00DFED05 /* FontAwesome5_Brands.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 85E609802CFC75AF00DFED05 /* FontAwesome5_Brands.ttf */; };
+		85E609832CFC75B600DFED05 /* FontAwesome5_Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 85E609822CFC75B600DFED05 /* FontAwesome5_Regular.ttf */; };
+		85E609852CFC75BC00DFED05 /* FontAwesome5_Solid.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 85E609842CFC75BC00DFED05 /* FontAwesome5_Solid.ttf */; };
+		85E609872CFC75C000DFED05 /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 85E609862CFC75C000DFED05 /* Ionicons.ttf */; };
 		DE7B0C63871C14171BD42737 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 8B3AFB3EAD875E545E7CAD31 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
@@ -63,6 +68,11 @@
 		85CCB00C2C175E410042D2C8 /* libsqlite3.0.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.0.tbd; path = usr/lib/libsqlite3.0.tbd; sourceTree = SDKROOT; };
 		85CCB00E2C175E490042D2C8 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		85CCB0102C175E500042D2C8 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
+		85E6097E2CFC75A800DFED05 /* FontAwesome.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = FontAwesome.ttf; path = paipan_native/fonts/FontAwesome.ttf; sourceTree = "<group>"; };
+		85E609802CFC75AF00DFED05 /* FontAwesome5_Brands.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = FontAwesome5_Brands.ttf; path = paipan_native/fonts/FontAwesome5_Brands.ttf; sourceTree = "<group>"; };
+		85E609822CFC75B600DFED05 /* FontAwesome5_Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = FontAwesome5_Regular.ttf; path = paipan_native/fonts/FontAwesome5_Regular.ttf; sourceTree = "<group>"; };
+		85E609842CFC75BC00DFED05 /* FontAwesome5_Solid.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = FontAwesome5_Solid.ttf; path = paipan_native/fonts/FontAwesome5_Solid.ttf; sourceTree = "<group>"; };
+		85E609862CFC75C000DFED05 /* Ionicons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = Ionicons.ttf; path = paipan_native/fonts/Ionicons.ttf; sourceTree = "<group>"; };
 		8B3AFB3EAD875E545E7CAD31 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = paipan_native/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		AAC8E7256964735DEE76072D /* Pods-paipan_native-paipan_nativeTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-paipan_native-paipan_nativeTests.debug.xcconfig"; path = "Target Support Files/Pods-paipan_native-paipan_nativeTests/Pods-paipan_native-paipan_nativeTests.debug.xcconfig"; sourceTree = "<group>"; };
 		BE97DB72CBB6009BF5F3E4B4 /* Pods-paipan_native-paipan_nativeTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-paipan_native-paipan_nativeTests.release.xcconfig"; path = "Target Support Files/Pods-paipan_native-paipan_nativeTests/Pods-paipan_native-paipan_nativeTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -163,6 +173,11 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				85E609862CFC75C000DFED05 /* Ionicons.ttf */,
+				85E609842CFC75BC00DFED05 /* FontAwesome5_Solid.ttf */,
+				85E609822CFC75B600DFED05 /* FontAwesome5_Regular.ttf */,
+				85E609802CFC75AF00DFED05 /* FontAwesome5_Brands.ttf */,
+				85E6097E2CFC75A800DFED05 /* FontAwesome.ttf */,
 				13B07FAE1A68108700A75B9A /* paipan_native */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* paipan_nativeTests */,
@@ -260,11 +275,12 @@
 			};
 			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "paipan_native" */;
 			compatibilityVersion = "Xcode 12.0";
-			developmentRegion = en;
+			developmentRegion = "zh-Hans";
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
+				"zh-Hans",
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
@@ -289,9 +305,14 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				85E609852CFC75BC00DFED05 /* FontAwesome5_Solid.ttf in Resources */,
+				85E609832CFC75B600DFED05 /* FontAwesome5_Regular.ttf in Resources */,
+				85E609812CFC75AF00DFED05 /* FontAwesome5_Brands.ttf in Resources */,
+				85E6097F2CFC75A800DFED05 /* FontAwesome.ttf in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				DE7B0C63871C14171BD42737 /* PrivacyInfo.xcprivacy in Resources */,
+				85E609872CFC75C000DFED05 /* Ionicons.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
